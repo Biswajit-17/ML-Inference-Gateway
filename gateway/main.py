@@ -18,9 +18,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from drift.detector import DriftDetector
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -70,13 +71,14 @@ suitability_scorer: Optional[SuitabilityScorer] = None
 climate_resolver: Optional[ClimateResolver] = None
 cache_manager: Optional[CacheManager] = None
 openrouter_runner: Optional[OpenRouterRunner] = None
+drift_detector: Optional[DriftDetector] = None
 startup_time = time.time()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan manager to handle startup integrity checks and component loads."""
-    global onnx_runner, suitability_scorer, climate_resolver, cache_manager, openrouter_runner
+    global onnx_runner, suitability_scorer, climate_resolver, cache_manager, openrouter_runner, drift_detector
 
     logger.info("Starting up HarvestGate Gateway...")
 
@@ -113,6 +115,14 @@ async def lifespan(app: FastAPI):
         # 4. Initialize OpenRouter LLM Advisor
         openrouter_runner = OpenRouterRunner()
 
+        # 5. Initialize Data Drift Detector
+        drift_detector = DriftDetector(
+            baseline_path=os.path.join(BASE_DIR, "drift", "baseline_stats.json"),
+            redis_client=cache_manager.client if (cache_manager and cache_manager.client) else None,
+            min_samples=100,
+            eval_interval=50
+        )
+
         GATEWAY_INFO.info({
             "version": "1.0.0",
             "model_format": "onnx",
@@ -148,6 +158,14 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # ── Prometheus /metrics Scrape Endpoint ──
 metrics_asgi = make_asgi_app()
 app.mount("/metrics", metrics_asgi)
+
+
+def get_client_ip(request: Request) -> str:
+    """Extracts client IP, respecting X-Forwarded-For if behind reverse proxies."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "127.0.0.1"
 
 # ── CORS Configuration ──
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
@@ -244,7 +262,7 @@ async def root():
 
 @app.post("/recommend", response_model=RecommendResponse)
 @limiter.limit("30/minute")
-async def recommend(request: Request, payload: RecommendRequest):
+async def recommend(request: Request, payload: RecommendRequest, background_tasks: BackgroundTasks):
     """
     Consumer-Facing Recommendation Endpoint.
 
@@ -279,6 +297,22 @@ async def recommend(request: Request, payload: RecommendRequest):
 
     # 2. Resolve NPK defaults & rainfall (fetches weather or falls back)
     climate_data, source = await climate_resolver.resolve(payload.state, payload.district)
+
+    # Record request features for data drift checks in background
+    if drift_detector:
+        background_tasks.add_task(
+            drift_detector.record_request,
+            get_client_ip(request),
+            {
+                "N": climate_data["n_avg"],
+                "P": climate_data["p_avg"],
+                "K": climate_data["k_avg"],
+                "annual_rainfall": climate_data["annual_rainfall_avg"],
+                "kharif_rainfall": climate_data["kharif_rainfall_avg"],
+                "rabi_rainfall": climate_data["rabi_rainfall_avg"],
+                "irrigation_ratio": climate_data["irrigation_ratio_avg"],
+            }
+        )
 
     # 3. Build full environment profile for model runner
     env_profile = {
@@ -354,7 +388,7 @@ async def recommend(request: Request, payload: RecommendRequest):
 
 @app.post("/predict", response_model=PredictResponse)
 @limiter.limit("60/minute")
-async def predict(request: Request, payload: PredictRequest):
+async def predict(request: Request, payload: PredictRequest, background_tasks: BackgroundTasks):
     """
     Integration-Facing Predict Endpoint.
 
@@ -390,6 +424,22 @@ async def predict(request: Request, payload: PredictRequest):
         "Primary Soil Type": payload.soil_type,
         "State Name": payload.state,
     }
+
+    # Record request features for data drift checks in background
+    if drift_detector:
+        background_tasks.add_task(
+            drift_detector.record_request,
+            get_client_ip(request),
+            {
+                "N": payload.N,
+                "P": payload.P,
+                "K": payload.K,
+                "annual_rainfall": payload.annual_rainfall,
+                "kharif_rainfall": payload.kharif_rainfall,
+                "rabi_rainfall": payload.rabi_rainfall,
+                "irrigation_ratio": payload.irrigation_ratio,
+            }
+        )
 
     # Single-crop mode vs multi-crop mode
     explanation = None
@@ -482,10 +532,10 @@ async def predict(request: Request, payload: PredictRequest):
 
 @app.post("/predict/explain", response_model=PredictResponse)
 @limiter.limit("10/minute")
-async def predict_explain(request: Request, payload: PredictRequest):
+async def predict_explain(request: Request, payload: PredictRequest, background_tasks: BackgroundTasks):
     """Convenience alias endpoint that forces explain=True."""
     payload.explain = True
-    return await predict(request, payload)
+    return await predict(request, payload, background_tasks)
 
 
 # ── Front-End Backward Compatibility Routes ──
