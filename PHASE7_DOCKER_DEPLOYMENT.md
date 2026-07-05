@@ -1,4 +1,4 @@
-# Phase 6 — Dockerization & Deployment Design & Roadmap
+# Phase 7 — Dockerization & Deployment Design & Roadmap
 
 This document outlines the step-by-step implementation plan for containerizing the HarvestGate ML Inference Gateway, establishing a dual-orchestration strategy for both self-contained local execution and cloud-forwarded metrics monitoring, and deploying to production.
 
@@ -6,7 +6,7 @@ This document outlines the step-by-step implementation plan for containerizing t
 
 ## 📅 Implementation Steps
 
-### Step 1: Create Gateway Dockerfile & .dockerignore (Phase 6.1)
+### Step 1: Create Gateway Dockerfile & .dockerignore (Phase 7.1)
 
 Create a production-ready, minimal Docker container to run the FastAPI gateway application.
 
@@ -18,7 +18,7 @@ Create a production-ready, minimal Docker container to run the FastAPI gateway a
 
 ---
 
-### Step 2: Configure Local Self-Contained Orchestration (Phase 6.2a)
+### Step 2: Configure Local Self-Contained Orchestration (Phase 7.2a)
 
 Update the default compose configuration in [docker-compose.yml](file:///c:/Users/Biswajitrk/Documents/COdezzz/HarvestGate%20-%20ML%20Inference%20Gateway/docker-compose.yml) to allow any developer to run the entire stack locally with zero configuration.
 
@@ -32,7 +32,7 @@ Update the default compose configuration in [docker-compose.yml](file:///c:/User
 
 ---
 
-### Step 3: Configure Cloud Forwarding Orchestration (Phase 6.2b)
+### Step 3: Configure Cloud Forwarding Orchestration (Phase 7.2b)
 
 Create a dedicated cloud-forwarding compose configuration to push telemetry metrics to Grafana Cloud, bypassing local database storage requirements.
 
@@ -45,7 +45,7 @@ Create a dedicated cloud-forwarding compose configuration to push telemetry metr
 
 ---
 
-### Step 4: Write Comprehensive README & Documentation (Phase 6.3)
+### Step 4: Write Comprehensive README & Documentation (Phase 7.3)
 
 Create `README.md` at the project root to serve as a complete portfolio handbook.
 
@@ -55,7 +55,7 @@ Create `README.md` at the project root to serve as a complete portfolio handbook
 
 ---
 
-### Step 5: Deploy to Render / Railway (Phase 6.4)
+### Step 5: Deploy to Render / Railway (Phase 7.4)
 
 Configure cloud deployment settings for a live online demonstration.
 
@@ -69,7 +69,7 @@ Configure cloud deployment settings for a live online demonstration.
 
 ---
 
-## 🔒 Phase 6 Security Hardening Matrix
+## 🔒 Phase 7 Security Hardening Matrix
 
 | Security Rule | Risk Addressed | Implementation Detail |
 |---|---|---|

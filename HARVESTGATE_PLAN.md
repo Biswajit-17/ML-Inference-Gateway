@@ -544,12 +544,18 @@ Phase 5 — Drift Detection (Days 11-13)
   [ ] Integrate drift check into prediction pipeline
   [ ] PSI alerts appearing in Grafana
 
-Phase 6 — Deployment (Days 14-15)
-  [ ] Dockerfile
-  [ ] docker-compose.yml
-  [ ] Deploy to Railway or Render
-  [ ] Live URL in README
-  [ ] Demo video (2 min)
+Phase 6 — Interactive Frontend & Security Hardening (Days 14-15)
+  [ ] Swagger & ReDoc production auto-hiding
+  [ ] Single-page web UI layout (Frosted Glassmorphism UI)
+  [ ] Client-side validation, XSS prevention, and 429 rate limit overlays
+  [ ] Serve frontend from gateway root `/`
+
+Phase 7 — Dockerization & Deployment (Days 16-17)
+  [ ] Gateway Dockerfile & .dockerignore
+  [ ] Local Self-Contained Compose (docker-compose.yml)
+  [ ] Cloud Forwarding Compose (docker-compose.cloud.yml + Grafana Alloy)
+  [ ] README & documentation
+  [ ] Deploy to Railway/Render
 ```
 
 ---
