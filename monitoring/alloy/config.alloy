@@ -1,0 +1,19 @@
+// Grafana Alloy Configuration for HarvestGate Cloud Forwarding
+
+prometheus.scrape "harvestgate_scrape" {
+  targets = [
+    { "__address__" = "gateway:8000" },
+  ]
+  forward_to = [prometheus.remote_write.grafana_cloud_prometheus.receiver]
+  scrape_interval = "15s"
+}
+
+prometheus.remote_write "grafana_cloud_prometheus" {
+  endpoint {
+    url = sys.env("GRAFANA_CLOUD_PROM_URL")
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_USER")
+      password = sys.env("GRAFANA_CLOUD_TOKEN")
+    }
+  }
+}
