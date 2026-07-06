@@ -373,11 +373,9 @@ async def recommend(request: Request, payload: RecommendRequest, background_task
         latency_ms=round(latency_ms, 2),
     )
 
-    # 7. Cache the Response
+    # 7. Cache the Response - Always cache successful predictions regardless of explanation status
     if cache_manager and cache_manager.is_connected and cache_key:
-        # Do not cache fallback/failure explanations to allow retry
-        if not (explanation and ("temporarily unavailable" in explanation or "active circuit breaker" in explanation)):
-            await cache_manager.set(cache_key, response_data.model_dump())
+        await cache_manager.set(cache_key, response_data.model_dump())
 
     return response_data
 
@@ -520,11 +518,9 @@ async def predict(request: Request, payload: PredictRequest, background_tasks: B
             model_backend="onnx",
         )
 
-    # 2. Cache the Response
+    # 2. Cache the Response - Always cache successful predictions regardless of explanation status
     if cache_manager and cache_manager.is_connected and cache_key:
-        # Do not cache fallback/failure explanations to allow retry
-        if not (explanation and ("temporarily unavailable" in explanation or "active circuit breaker" in explanation)):
-            await cache_manager.set(cache_key, response_data.model_dump())
+        await cache_manager.set(cache_key, response_data.model_dump())
 
     return response_data
 
@@ -613,26 +609,34 @@ async def get_defaults(request: Request, state_name: str, district: Optional[str
     if not climate_resolver:
         raise HTTPException(status_code=503, detail="Service unavailable")
 
-    try:
-        climate_data, source = climate_resolver._get_historical_fallback(
-            state_name, district
-        )
-        return {
-            "state": state_name.upper(),
-            "district": district.upper() if district else None,
-            "n_avg": climate_data["n_avg"],
-            "p_avg": climate_data["p_avg"],
-            "k_avg": climate_data["k_avg"],
-            "annual_rainfall_avg": climate_data["annual_rainfall_avg"],
-            "kharif_rainfall_avg": climate_data["kharif_rainfall_avg"],
-            "rabi_rainfall_avg": climate_data["rabi_rainfall_avg"],
-            "irrigation_ratio_avg": climate_data["irrigation_ratio_avg"],
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    # Map name mapping if needed
+    lookup_state = state_name
+    if lookup_state.upper() == "ODISHA":
+        lookup_state = "Orissa"
 
+    # Search defaults
+    state_data = climate_resolver.defaults.get(lookup_state)
+    if not state_data:
+        # Loop to scan case insensitive
+        for s_name, s_val in climate_resolver.defaults.items():
+            if s_name.upper() == lookup_state.upper():
+                state_data = s_val
+                break
 
-# ── Operations API Endpoints ──
+    if not state_data:
+        return {}
+
+    if district:
+        district_data = state_data.get("districts", {}).get(district)
+        if not district_data:
+            # Try case insensitive
+            for d_name, d_val in state_data.get("districts", {}).items():
+                if d_name.upper() == district.upper():
+                    district_data = d_val
+                    break
+        return district_data if district_data else {}
+
+    return state_data
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -647,6 +651,10 @@ async def health(request: Request):
         status="healthy",
         onnx_loaded=(onnx_runner is not None),
         redis_connected=redis_status,
-        llm_circuit_breaker_state=circuit_breaker.state,
-        uptime_seconds=round(time.time() - startup_time, 1),
+        llm_available=(openrouter_runner is not None),
     )
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
