@@ -622,6 +622,7 @@ input:checked + .switch-slider:before {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.25rem;
+    width: 100%;
 }
 
 .recommendations-header h3 {
@@ -630,16 +631,17 @@ input:checked + .switch-slider:before {
 }
 
 .recommendations-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
     animation: fade-slide-in 0.25s ease-out;
+    width: 100%;
 }
 
 .recommendation-row {
     background-color: var(--bg-highlight);
     border: 1px solid var(--border-color);
-    padding: 1rem 1.25rem;
+    padding: 0.85rem 1rem;
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;
@@ -649,6 +651,18 @@ input:checked + .switch-slider:before {
 
 .recommendation-row:hover {
     border-color: var(--color-recommend);
+}
+
+.recommendation-row:first-child {
+    grid-column: span 2;
+    border-color: var(--color-recommend);
+    background-color: #1e1b4b;
+    padding: 1.15rem 1.35rem;
+}
+
+.recommendation-row:first-child .rec-name {
+    font-size: 1.05rem;
+    color: var(--color-accent);
 }
 
 .rec-rank-block {

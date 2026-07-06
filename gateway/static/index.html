@@ -8,23 +8,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/static/index.css?v=1.2">
 </head>
 <body>
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
             <div class="header-logo">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
                 <div class="logo-text">
                     <h1>HarvestGate</h1>
                     <span class="logo-sub">ML Inference & Observation Layer</span>
                 </div>
             </div>
             <div class="system-status">
-                <span class="status-indicator"></span>
                 <span class="status-text">Gateway Online</span>
             </div>
         </header>
@@ -41,8 +37,8 @@
 
                 <!-- Navigation Tabs -->
                 <div class="tabs">
-                    <button id="tab-predict" class="tab-btn active">Yield Simulator</button>
-                    <button id="tab-recommend" class="tab-btn">Crop Recommender</button>
+                    <button id="tab-predict" class="tab-btn active">Yield Predictor</button>
+                <button id="tab-recommend" class="tab-btn">Crop Recommender</button>
                 </div>
 
                 <form id="inference-form" class="parameter-form">
@@ -203,7 +199,7 @@
                     <div class="advisory-toggle-row">
                         <div class="toggle-text">
                             <span class="toggle-title">AI Agronomic Advisory</span>
-                            <span class="toggle-desc">Generate an explanation using OpenRouter LLM.</span>
+                            <span class="toggle-desc">Generate AI-powered agronomic insights and advisory.</span>
                         </div>
                         <label class="switch">
                             <input type="checkbox" id="check-advisory" checked>
@@ -232,7 +228,7 @@
                             <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/>
                         </svg>
                         <h3>Awaiting Execution</h3>
-                        <p>Configure parameters in the left panel and execute to run local ONNX simulation and request AI advisories.</p>
+                        <p>Configure parameters in the left panel and execute to run the prediction pipeline and request AI advisories.</p>
                     </div>
 
                     <!-- State 2: Loading -->
@@ -247,7 +243,7 @@
                         <div class="result-highlight-card">
                             <div class="result-meta">
                                 <span class="result-crop-name" id="res-predict-crop">Rice</span>
-                                <span class="badge success-badge">Local ONNX Output</span>
+                                <span class="badge success-badge">Inference Result</span>
                             </div>
                             <div class="result-value-container">
                                 <span class="result-number" id="res-predict-yield">3,240.5</span>

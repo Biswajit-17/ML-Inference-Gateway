@@ -210,11 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
         btnRun.textContent = 'Executing Pipeline...';
 
         if (payload.explain) {
-            loaderTitle.textContent = 'Invoking Hybrid Engine...';
-            loaderDesc.textContent = 'Running local ONNX yield predictions and awaiting LLM advisory...';
+            loaderTitle.textContent = 'Running Inference Pipeline...';
+            loaderDesc.textContent = 'Evaluating agronomic models and fetching advisory...';
         } else {
-            loaderTitle.textContent = 'Executing local ONNX simulation...';
-            loaderDesc.textContent = 'Evaluating mathematical yield matrices in local CPU runtime...';
+            loaderTitle.textContent = 'Evaluating prediction model...';
+            loaderDesc.textContent = 'Calculating expected crop yields...';
         }
 
         try {
