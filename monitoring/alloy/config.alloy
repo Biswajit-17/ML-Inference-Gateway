@@ -2,7 +2,7 @@
 
 prometheus.scrape "harvestgate_scrape" {
   targets = [
-    { "__address__" = "gateway.railway.internal:8000" },
+    { "__address__" = "ml-inference-gateway-production.up.railway.app" },
   ]
   forward_to = [prometheus.remote_write.grafana_cloud_prometheus.receiver]
   scrape_interval = "15s"
