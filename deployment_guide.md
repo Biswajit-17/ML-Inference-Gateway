@@ -117,3 +117,15 @@ If you prefer pushing metrics securely from your container network:
 2. Select **Settings** ➔ **Docker** ➔ and specify the target to build the Alloy service using the config file `./monitoring/alloy/config.alloy`.
 3. Provide your `GRAFANA_CLOUD_PROM_URL`, `GRAFANA_CLOUD_USER`, and `GRAFANA_CLOUD_TOKEN` as environment variables.
 4. Alloy will boot as a companion container, scrape your gateway privately, and remote-write to Grafana Cloud.
+
+---
+
+### 5. Import the Performance Dashboard
+Once your metrics are flowing into Grafana Cloud (via Hosted Scraping or Alloy):
+1. Go to your local workspace and find the pre-configured dashboard file: [`monitoring/grafana/dashboards/harvestgate_dashboard.json`](file:///c:/Users/Biswajitrk/Documents/COdezzz/HarvestGate%20-%20ML%20Inference%20Gateway/monitoring/grafana/dashboards/harvestgate_dashboard.json).
+2. Open your [Grafana Cloud Instance](https://grafana.com/).
+3. Click the navigation menu ➔ **Dashboards** ➔ **New** ➔ **Import** (or click **Import** at `https://your-instance.grafana.net/dashboard/import`).
+4. Click **Upload JSON file** and upload `harvestgate_dashboard.json`.
+5. Under the *Prometheus* dropdown at the bottom, select your Grafana Cloud Prometheus datasource (usually named `grafanacloud-xxxx-prom`).
+6. Click **Import**.
+7. Your production dashboard is ready! You will see real-time charts showing model latency, caching hit ratio, active requests, and data drift metrics.
