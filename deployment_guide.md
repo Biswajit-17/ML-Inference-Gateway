@@ -42,7 +42,7 @@ Railway is highly recommended because it offers rapid compilation, easy Redis pr
 Click on the **Gateway** service, go to the **Variables** tab, and add the following variables:
 *   `ENV = production` (Disables API docs `/docs`)
 *   `PORT = 8000`
-*   `REDIS_URL` (Reference the Redis container privately to avoid egress fees and optimize speed: `redis://:${{Redis.REDISPASSWORD}}@${{Redis.RAILWAY_PRIVATE_DOMAIN}}:${{Redis.REDIS_PORT}}`)
+*   `REDIS_URL` (Reference the Redis container privately to avoid egress fees and optimize speed: `${{ Redis.REDIS_PRIVATE_URL }}`)
 *   `OPENROUTER_API_KEY` (Your OpenRouter token for advisory explanations)
 
 ### 4. Domain & Verification
