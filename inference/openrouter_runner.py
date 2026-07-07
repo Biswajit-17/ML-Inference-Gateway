@@ -66,7 +66,7 @@ class OpenRouterRunner:
                 import httpx
                 # Use a custom httpx AsyncClient to prevent HTTP proxy injection issues
                 # in library constructors (especially on Windows / sandbox runtimes)
-                http_client = httpx.AsyncClient(timeout=20.0)
+                http_client = httpx.AsyncClient(timeout=30.0)
                 self.client = AsyncOpenAI(
                     api_key=self.api_key,
                     base_url=self.base_url,
@@ -136,7 +136,7 @@ class OpenRouterRunner:
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=200,      # Constrain token generation to limit response size
+                max_tokens=400,      # Constrain token generation to limit response size
                 temperature=0.7,     # Balances factual precision and natural phrasing
                 extra_headers={
                     "HTTP-Referer": "https://github.com/Biswajit-17/HarvestGate---ML-Inference-Gateway",
