@@ -66,7 +66,7 @@ class OpenRouterRunner:
                 import httpx
                 # Use a custom httpx AsyncClient to prevent HTTP proxy injection issues
                 # in library constructors (especially on Windows / sandbox runtimes)
-                http_client = httpx.AsyncClient(timeout=8.0)
+                http_client = httpx.AsyncClient(timeout=20.0)
                 self.client = AsyncOpenAI(
                     api_key=self.api_key,
                     base_url=self.base_url,
